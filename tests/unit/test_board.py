@@ -48,3 +48,24 @@ def test_render_contains_marks_and_separators():
     rendered = b.render("XOX......")
     assert "X" in rendered and "O" in rendered
     assert "---+---+---" in rendered
+
+
+def test_winning_lines_are_generated_for_3x3():
+    # 3 filas + 3 columnas + 2 diagonales = 8 líneas, todas de longitud 3.
+    lines = set(b.WINNING_LINES)
+    assert len(b.WINNING_LINES) == 8
+    assert all(len(line) == 3 for line in b.WINNING_LINES)
+    assert (0, 1, 2) in lines  # primera fila
+    assert (0, 3, 6) in lines  # primera columna
+    assert (0, 4, 8) in lines and (2, 4, 6) in lines  # diagonales
+
+
+def test_winning_lines_generalize_to_other_sizes():
+    # La generación es por código: para un tablero 4x4 hay 4+4+2 = 10 líneas de longitud 4.
+    lines = b._compute_winning_lines(4)
+    assert len(lines) == 10
+    assert all(len(line) == 4 for line in lines)
+    assert (0, 1, 2, 3) in lines       # primera fila
+    assert (0, 4, 8, 12) in lines      # primera columna
+    assert (0, 5, 10, 15) in lines     # diagonal principal
+    assert (3, 6, 9, 12) in lines      # diagonal secundaria

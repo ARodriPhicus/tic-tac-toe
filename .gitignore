@@ -30,3 +30,7 @@ data/
 *.swp
 .idea/
 .vscode/
+
+# Material de estudio (personal, no forma parte del proyecto)
+*.pptx
+Chuleta-Tres-en-Raya.*

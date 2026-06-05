@@ -44,6 +44,12 @@ class GameService:
             return b.MARK_O
         raise PlayerNotInGame("No participas en esta partida.")
 
+    @staticmethod
+    def _require_participant(game: GameEntity, player_id: int) -> None:
+        """Autorización: solo los dos jugadores de la partida pueden acceder a ella."""
+        if player_id not in (game.player_x_id, game.player_o_id):
+            raise PlayerNotInGame("No participas en esta partida.")
+
     # --- casos de uso --------------------------------------------------------------------
 
     async def create_game(self, creator_id: int) -> GameEntity:
@@ -105,14 +111,17 @@ class GameService:
 
         return game
 
-    async def get_game(self, game_id: int) -> GameEntity:
-        return await self._require_game(game_id)
+    async def get_game(self, game_id: int, player_id: int) -> GameEntity:
+        game = await self._require_game(game_id)
+        self._require_participant(game, player_id)
+        return game
 
     async def list_games(self, player_id: int) -> list[GameEntity]:
         return await self._games.list_for_player(player_id)
 
-    async def get_moves(self, game_id: int) -> list[MoveEntity]:
-        await self._require_game(game_id)
+    async def get_moves(self, game_id: int, player_id: int) -> list[MoveEntity]:
+        game = await self._require_game(game_id)
+        self._require_participant(game, player_id)
         return await self._moves.list_for_game(game_id)
 
     async def leaderboard(self) -> list[PlayerEntity]:

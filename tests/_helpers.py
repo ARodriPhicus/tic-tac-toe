@@ -10,7 +10,7 @@ from tictactoe.infrastructure.db import create_engine, create_session_factory, i
 def build_settings(db_path: str) -> Settings:
     return Settings(
         database_url=f"sqlite+aiosqlite:///{db_path}",
-        jwt_secret="test-secret",
+        jwt_secret="test-secret-with-at-least-32-bytes-length!!",
     )
 
 

@@ -95,7 +95,7 @@ Variables de entorno (prefijo `TTT_`, también vía fichero `.env`):
 | Variable | Por defecto | Descripción |
 |----------|-------------|-------------|
 | `TTT_DATABASE_URL` | `sqlite+aiosqlite:///./tictactoe.db` | URL de conexión (SQLAlchemy async) |
-| `TTT_JWT_SECRET` | *(valor de desarrollo)* | **Cámbialo en producción** |
+| `TTT_JWT_SECRET` | *(autogenerado si no se define)* | Secreto para firmar JWT. Si no se define, se genera uno **aleatorio** en arranque (no hay secretos en el repo). **Defínelo en producción** para que las sesiones sobrevivan a reinicios y entre réplicas |
 | `TTT_JWT_EXPIRES_MINUTES` | `1440` | Caducidad del token |
 
 ---
@@ -150,9 +150,13 @@ src/tictactoe/
 - **Separación de capas con DTOs.** Los repositorios traducen entre modelos ORM y *dataclasses*
   de aplicación, para que los servicios y el dominio no dependan de SQLAlchemy.
 
-- **Autenticación.** Registro con contraseña hasheada (**bcrypt**) y login que emite un **JWT**
-  (PyJWT) usado como bearer token; *stateless* y cómodo de consumir desde CLI/tests. Se usa
-  `bcrypt` directamente (no `passlib`) por compatibilidad con bcrypt 5.x.
+- **Autenticación y autorización.** Registro con contraseña hasheada (**bcrypt**) y login que
+  emite un **JWT** (PyJWT) usado como bearer token; *stateless* y cómodo de consumir desde
+  CLI/tests. Se usa `bcrypt` directamente (no `passlib`) por compatibilidad con bcrypt 5.x. La
+  decodificación restringe el algoritmo (`HS256`) y rechaza tokens caducados, forjados con otro
+  secreto o con `alg=none`. Además hay **control de acceso por recurso**: una partida y su log
+  solo son accesibles para sus dos jugadores (evita IDOR); un tercero recibe `403`. El **secreto
+  JWT nunca se cablea en el repo**: si no se define se genera uno aleatorio en arranque.
 
 - **Manejo de errores uniforme.** Las excepciones de dominio/aplicación se mapean a códigos
   HTTP en un único lugar (`api/main.py`): p. ej. casilla ocupada → 409, fuera de turno → 403,

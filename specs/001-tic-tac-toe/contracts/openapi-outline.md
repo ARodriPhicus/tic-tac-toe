@@ -39,8 +39,8 @@ Lista las partidas del jugador autenticado.
 - 200: `[ Game, ... ]`
 
 ### GET /games/{id} 🔒
-Estado de una partida (incluye render del tablero).
-- 200: objeto Game · 404: no existe.
+Estado de una partida (incluye render del tablero). Solo accesible para sus jugadores.
+- 200: objeto Game · 403: el jugador no participa en la partida · 404: no existe.
 
 ### POST /games/{id}/moves 🔒
 Realiza un movimiento.
@@ -51,8 +51,9 @@ Realiza un movimiento.
   404: partida no existe · 409: casilla ocupada / partida no en curso o finalizada.
 
 ### GET /games/{id}/moves 🔒
-Log de movimientos de la partida, en orden.
+Log de movimientos de la partida, en orden. Solo accesible para sus jugadores.
 - 200: `[ { "move_number": int, "player_id": int, "mark": "X|O", "position": int, "created_at": datetime }, ... ]`
+- 403: el jugador no participa en la partida · 404: partida no existe.
 
 ### GET /leaderboard
 Marcador global de jugadores.

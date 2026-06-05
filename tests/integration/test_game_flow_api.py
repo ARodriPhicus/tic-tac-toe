@@ -96,3 +96,33 @@ async def test_join_full_game_is_rejected(client, two_players):
 async def test_get_unknown_game_is_404(client, two_players):
     res = await client.get("/games/9999", headers=two_players["ana"]["headers"])
     assert res.status_code == 404
+
+
+async def _register_outsider(client, name="eve"):
+    await client.post("/auth/register", json={"username": name, "password": "pw"})
+    login = await client.post("/auth/login", json={"username": name, "password": "pw"})
+    return {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+
+async def test_non_participant_cannot_read_game(client, two_players):
+    # Control de acceso (IDOR): un jugador ajeno no puede ver una partida que no es suya.
+    game_id, ana, bob = await _create_and_join(client, two_players)
+    eve_headers = await _register_outsider(client)
+    res = await client.get(f"/games/{game_id}", headers=eve_headers)
+    assert res.status_code == 403
+
+
+async def test_non_participant_cannot_read_move_log(client, two_players):
+    game_id, ana, bob = await _create_and_join(client, two_players)
+    eve_headers = await _register_outsider(client)
+    res = await client.get(f"/games/{game_id}/moves", headers=eve_headers)
+    assert res.status_code == 403
+
+
+async def test_participant_can_read_game_and_log(client, two_players):
+    game_id, ana, bob = await _create_and_join(client, two_players)
+    assert (await client.get(f"/games/{game_id}", headers=ana["headers"])).status_code == 200
+    assert (await client.get(f"/games/{game_id}", headers=bob["headers"])).status_code == 200
+    assert (
+        await client.get(f"/games/{game_id}/moves", headers=bob["headers"])
+    ).status_code == 200

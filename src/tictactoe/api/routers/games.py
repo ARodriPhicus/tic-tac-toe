@@ -34,7 +34,7 @@ async def list_games(current: CurrentPlayer, games: GameServiceDep) -> list[Game
 async def get_game(
     game_id: int, current: CurrentPlayer, games: GameServiceDep
 ) -> GameResponse:
-    game = await games.get_game(game_id)
+    game = await games.get_game(game_id, current.id)
     return GameResponse.from_entity(game)
 
 
@@ -50,7 +50,7 @@ async def make_move(
 async def list_moves(
     game_id: int, current: CurrentPlayer, games: GameServiceDep
 ) -> list[MoveResponse]:
-    moves = await games.get_moves(game_id)
+    moves = await games.get_moves(game_id, current.id)
     return [MoveResponse.from_entity(m) for m in moves]
 
 

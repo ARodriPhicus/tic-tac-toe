@@ -1,50 +1,62 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Tic-Tac-Toe Backend Constitution
+
+Principios de ingeniería que rigen este proyecto. Toda decisión de diseño, plan
+e implementación debe poder justificarse contra estos principios.
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Dominio puro y aislado (Domain-First)
+La lógica del juego (tablero, turnos, validación de movimientos, detección de
+ganador/empate) vive en un dominio sin dependencias de I/O, frameworks ni base de
+datos. Debe ser determinista, sincrónico y 100% testeable de forma unitaria sin
+levantar la aplicación. La infraestructura depende del dominio, nunca al revés.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Interfaz por contrato (API + CLI)
+La funcionalidad se expone mediante una API REST documentada (OpenAPI/Swagger) y,
+adicionalmente, un CLI mínimo capaz de jugar una partida completa. El contrato de
+la API es estable y validado: entradas inválidas producen errores claros con el
+código HTTP adecuado; nunca un estado corrupto.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Test-First (NO NEGOCIABLE)
+Cada regla del juego y cada endpoint tiene pruebas. El dominio se cubre con tests
+unitarios (todas las líneas ganadoras, empate, turno incorrecto, celda ocupada,
+fuera de rango). Los flujos de API se cubren con tests de integración asíncronos.
+No se da por terminada una funcionalidad sin sus tests en verde.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Asincronía donde aporta valor
+La asincronía se usa solo donde aporta valor real: I/O de red (endpoints HTTP) y
+acceso a base de datos (driver async). El dominio permanece síncrono porque es
+cómputo puro y la concurrencia ahí solo añadiría complejidad sin beneficio.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Inversión de dependencias y persistencia durable
+Los casos de uso dependen de puertos (interfaces/Protocols), no de
+implementaciones concretas. Las implementaciones (repositorios SQLite, seguridad)
+se inyectan por wiring explícito, lo que permite sustituirlas en tests. El estado
+de las partidas se persiste de forma durable y sobrevive a reinicios de la app.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Additional Constraints (Technology & Quality)
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- **Runtime**: Python 3.12. El código debe ejecutarse en un intérprete 3.12 limpio.
+- **Stack**: FastAPI (API async + OpenAPI), SQLAlchemy async + SQLite (aiosqlite)
+  para persistencia, Pydantic para validación de I/O, pytest para tests.
+- **Calidad**: linting con Ruff; tipado con anotaciones; funciones pequeñas y con
+  responsabilidad única; mensajes de error orientados al consumidor de la API.
+- **Seguridad**: contraseñas siempre hasheadas; autenticación por token; ningún
+  secreto en el repositorio.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow (Spec-Driven)
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+El desarrollo sigue el flujo de spec-kit y se versiona en Git por fases:
+`constitution → specify → (clarify) → plan → tasks → (analyze) → implement`.
+Cada fase produce un artefacto versionado en `specs/` y un commit independiente.
+Los requisitos mínimos de la prueba son obligatorios; los valorables se abordan
+solo tras cubrir los mínimos con calidad.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+Esta constitución prevalece sobre preferencias ad-hoc. Cualquier desviación
+(p. ej. añadir complejidad no justificada) debe documentarse en el apartado
+*Complexity Tracking* del plan con su justificación y la alternativa más simple
+descartada. La trazabilidad spec ↔ plan ↔ tasks ↔ código debe mantenerse.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-06-05 | **Last Amended**: 2026-06-05
